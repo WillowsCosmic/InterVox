@@ -7,17 +7,21 @@ import Image from 'next/image';
 import { redirect } from 'next/navigation';
 import React from 'react'
 
+interface RouteParams {
+  params: Promise<{ id: string }>;
+}
+
 const page = async ({ params }: RouteParams) => {
     const { id } = await params;
     const interview = await getInterviewById(id);
-    const user = getCurentUser()
+    const user = await getCurentUser(); // ✅ Added await
 
     if (!interview) redirect('/')
     return (
         <>
             <div className="flex flex-row gap-4 justify-between">
                 <div className="flex flex-row gap-4 items-center max-sm:flex-col">
-                    <div className="flex flex-fow gap-4 items-center">
+                    <div className="flex flex-row gap-4 items-center"> {/* ✅ Fixed flex-fow */}
                         <Image
                             src={getRandomInterviewCover()}
                             alt='cover'
@@ -25,15 +29,14 @@ const page = async ({ params }: RouteParams) => {
                             height={40}
                             className='rounded-full object-cover size-[40px]' />
                         <h3 className='capitalize'>{interview.role} Interview</h3>
-
                     </div>
                     <DisplayTechIcons techStack={interview.techstack} />
                 </div>
                 <p className='bg-dark-200 px-4 py-2 rounded-lg h-fit capitalize'>{interview.type}</p>
             </div>
             <Agent
-                userName={user?.name}
-                type={user?.id}
+                userName={user?.name || ''}
+                userId={user?.id}
                 interviewId={id}
                 type="interview"
                 questions={interview.questions}

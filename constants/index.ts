@@ -156,37 +156,19 @@ End the conversation on a polite and positive note.
 };
 
 export const feedbackSchema = z.object({
-  totalScore: z.number(),
-  categoryScores: z.tuple([
-    z.object({
-      name: z.literal("Communication Skills"),
-      score: z.number(),
-      comment: z.string(),
-    }),
-    z.object({
-      name: z.literal("Technical Knowledge"),
-      score: z.number(),
-      comment: z.string(),
-    }),
-    z.object({
-      name: z.literal("Problem Solving"),
-      score: z.number(),
-      comment: z.string(),
-    }),
-    z.object({
-      name: z.literal("Cultural Fit"),
-      score: z.number(),
-      comment: z.string(),
-    }),
-    z.object({
-      name: z.literal("Confidence and Clarity"),
-      score: z.number(),
-      comment: z.string(),
-    }),
-  ]),
-  strengths: z.array(z.string()),
-  areasForImprovement: z.array(z.string()),
-  finalAssessment: z.string(),
+  totalScore: z.number().min(0).max(100).describe("Overall interview score from 0-100"),
+  communicationSkills: z.number().min(0).max(100).describe("Communication skills score"),
+  technicalKnowledge: z.number().min(0).max(100).describe("Technical knowledge score"),
+  problemSolving: z.number().min(0).max(100).describe("Problem solving score"),
+  culturalFit: z.number().min(0).max(100).describe("Cultural fit score"),
+  confidenceAndClarity: z.number().min(0).max(100).describe("Confidence and clarity score"),
+  strength1: z.string().describe("First key strength"),
+  strength2: z.string().describe("Second key strength"),
+  strength3: z.string().describe("Third key strength"),
+  improvement1: z.string().describe("First area for improvement"),
+  improvement2: z.string().describe("Second area for improvement"),
+  improvement3: z.string().describe("Third area for improvement"),
+  finalAssessment: z.string().describe("Comprehensive final assessment of the candidate")
 });
 
 export const interviewCovers = [

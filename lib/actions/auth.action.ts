@@ -22,7 +22,7 @@ export async function signUp(params: SignUpParams) {
         })
         return {
             success: true,
-            message: 'Account created successfully.Please sign in'
+            message: 'Account created successfully. Please sign in'
         }
     } catch (e: any) {
         console.error('Error creating a user', e);
@@ -54,13 +54,19 @@ export async function signIn(params: SignInParams) {
             }
         }
 
-        await setSessionCookie(idToken)
+        await setSessionCookie(idToken);
+        
+        return {
+            success: true,
+            message: "Successfully signed in"
+        };
+        
     } catch (e) {
         console.log(e);
 
         return {
             success: false,
-            message: "failed to log in account"
+            message: "Failed to log in account"
         }
     }
 }
@@ -69,8 +75,8 @@ export async function setSessionCookie(idToken: string) {
     const cookieStore = await cookies();
     const sessionCookie = await auth.createSessionCookie(idToken, {
         expiresIn: ONE_WEEK * 1000, //expires in one week
-
     })
+    
     cookieStore.set('session', sessionCookie, {
         maxAge: ONE_WEEK,
         httpOnly: true,
@@ -82,7 +88,6 @@ export async function setSessionCookie(idToken: string) {
 
 export async function getCurentUser(): Promise<User | null> {
     const cookieStore = await cookies();
-
     const sessionCookie = cookieStore.get('session')?.value;
 
     if (!sessionCookie) return null;
@@ -90,8 +95,9 @@ export async function getCurentUser(): Promise<User | null> {
     try {
         const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
 
-        const userRecord = await db.
-            collection('users')
+        // ✅ Fixed the line break issue
+        const userRecord = await db
+            .collection('users')
             .doc(decodedClaims.uid)
             .get();
 
@@ -103,14 +109,11 @@ export async function getCurentUser(): Promise<User | null> {
         } as User;
     } catch (e) {
         console.log(e)
-
         return null;
     }
 }
 
 export async function isAuthenticated() {
     const user = await getCurentUser();
-
     return !!user;
 }
-

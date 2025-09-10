@@ -1,6 +1,7 @@
 'use client'
 
 import { interviewer } from '@/constants';
+import { createFeedback } from '@/lib/actions/general.action';
 import { cn } from '@/lib/utils';
 import { vapi } from '@/lib/vapi.sdk';
 import Image from 'next/image'
@@ -64,10 +65,11 @@ const Agent = ({ userName, userId, type,interviewId,questions }: AgentProps) => 
 
 
         //TODO: Create a server action that generate interview
-        const {success,id} = {
-            success: true,
-            id: 'feedback-id'
-        }
+        const {success,feedbackId: id} = await createFeedback({
+            interviewId: interviewId!,
+            userId: userId!,
+            transcript:messages
+        })
         if(success && id){
             router.push(`/interview/${interviewId}/feedback`);
         }else{
@@ -116,7 +118,12 @@ const Agent = ({ userName, userId, type,interviewId,questions }: AgentProps) => 
     const handleDisconnect = async() =>{
         setCallStatus(CallStatus.FINISHED)
 
-        vapi.stop()
+        vapi.stop();
+        if (type !== 'generate') {
+            await handleGenerateFeedback(messages);
+        } else {
+            router.push('/');
+        }
     }
 
     const latestMessage = messages[messages.length - 1]?.content;
