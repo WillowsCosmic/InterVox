@@ -1,4 +1,5 @@
 import InterviewCard from '@/components/InterviewCard'
+import LogoutButton from '@/components/Logout'
 import { Button } from '@/components/ui/button'
 import { getCurentUser } from '@/lib/actions/auth.action'
 import { getInterviewByUserId, getLatestInterviews } from '@/lib/actions/general.action'
@@ -59,6 +60,9 @@ const page = async () => {
             )
           }
         </div>
+      </section>
+      <section className="flex justify-center mt-8 mb-8">
+        <LogoutButton/>
       </section>
     </>
   )

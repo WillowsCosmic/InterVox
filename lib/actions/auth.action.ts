@@ -2,6 +2,7 @@
 
 import { db, auth } from "@/firebase/admin";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 const ONE_WEEK = 60 * 60 * 24 * 7;
 
@@ -90,25 +91,34 @@ export async function getCurentUser(): Promise<User | null> {
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get('session')?.value;
 
+   
+
     if (!sessionCookie) return null;
 
     try {
         const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
+        console.log('   - decodedClaims.uid:', decodedClaims.uid);
 
-        // ✅ Fixed the line break issue
         const userRecord = await db
             .collection('users')
             .doc(decodedClaims.uid)
             .get();
 
-        if (!userRecord.exists) return null;
+        if (!userRecord.exists) {
+            
+            return null;
+        }
 
-        return {
+        const userData = {
             ...userRecord.data(),
             id: userRecord.id,
         } as User;
+
+        
+
+        return userData;
     } catch (e) {
-        console.log(e)
+        
         return null;
     }
 }
@@ -116,4 +126,18 @@ export async function getCurentUser(): Promise<User | null> {
 export async function isAuthenticated() {
     const user = await getCurentUser();
     return !!user;
+}
+export async function logout() {
+    try {
+        const cookieStore = await cookies();
+        
+        // Delete the session cookie
+        cookieStore.delete('session');
+        
+    } catch (e) {
+        console.error('Error during logout:', e);
+    }
+    
+    // Always redirect after logout attempt
+    redirect('/sign-in'); // or wherever your login page is
 }

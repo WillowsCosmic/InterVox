@@ -42,22 +42,28 @@ export async function getInterviewById(id: string): Promise<Interview | null> {
 
     return interview.data() as Interview | null;
 }
-export async function getFeedbackByInterviewId(
-    params: GetFeedbackByInterviewIdParams
-  ): Promise<Feedback | null> {
-    const { interviewId, userId } = params;
-  
-    const querySnapshot = await db
-      .collection("feedback")
-      .where("interviewId", "==", interviewId)
-      .where("userId", "==", userId)
-      .limit(1)
+export async function getFeedbackByInterviewId({ interviewId, userId }: { interviewId: string; userId: string }) {
+    
+    // Your existing logic...
+    const feedback = await db
+      .collection('feedback')
+      .where('interviewId', '==', interviewId)
+      .where('userId', '==', userId)
       .get();
   
-    if (querySnapshot.empty) return null;
-  
-    const feedbackDoc = querySnapshot.docs[0];
-    return { id: feedbackDoc.id, ...feedbackDoc.data() } as Feedback;
+    console.log(`   - Query results: ${feedback.docs.length} documents found`);
+    
+    if (feedback.docs.length > 0) {
+      const data = feedback.docs[0].data();
+      console.log(`   - Found feedback with totalScore: ${data.totalScore}`);
+      return data;
+    } else {
+      console.log(`   - No feedback found for this user/interview combination`);
+      
+     
+      
+      return null;
+    }
   }
 
 // Add this function in your general.action.ts file
@@ -103,8 +109,7 @@ async function createFallbackFeedback(interviewId: string, userId: string, reaso
 export async function createFeedback(params: CreateFeedbackParams) {
     const { interviewId, userId, transcript } = params;
 
-    console.log("=== FEEDBACK GENERATION START ===");
-    console.log("Received transcript:", transcript);
+    
 
     try {
         if (!transcript || !Array.isArray(transcript) || transcript.length === 0) {
@@ -136,7 +141,7 @@ export async function createFeedback(params: CreateFeedbackParams) {
         console.log("Formatted transcript preview:", formattedTranscript.substring(0, 500));
 
         if (formattedTranscript.trim().length < 50) {
-            console.log("❌ Insufficient transcript content");
+            
             return await createFallbackFeedback(interviewId, userId, "Insufficient content");
         }
 
